@@ -1,5 +1,4 @@
 # coding: utf-8
-
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,7 +27,7 @@ def date_calc(row):
 date_diff = projects.apply(date_calc, 1)
 
 # Create single vector dataframe of days to completion
-days_to_comp = pd.DataFrame({'days_to_completion': pd.Series(dateDiff)})
+days_to_comp = pd.DataFrame({'days_to_completion': pd.Series(date_diff)})
 
 # Subset opendata_projects to include only live projects
 live_projects = projects[projects.funding_status == 'live']
@@ -42,12 +41,26 @@ def date_calc2(row):
 date_diff2 = live_projects.apply(date_calc2, 1)
 
 # Create single vector dataframe of days to completion
-days_live = pd.DataFrame({'days_open': pd.Series(dateDiff2)})
+days_live = pd.DataFrame({'days_open': pd.Series(date_diff2)})
 
 # Combine city, state into city_state variable in projects dataframe
-projects["city_state"] = projects["school_city"] + ', ' + projects["school_state"]
+projects['city_state'] = projects['school_city'] + ', ' + projects['school_state']
+
+# Get the count of the completed projects from each city_state
+# and create levels from the top 50, and group all remaining into 51st category
+comp = projects[projects.funding_status == 'completed']
+counts = comp['city_state'].value_counts()
+ranks = pd.DataFrame([x+1 for x in range(counts.shape[0])], columns = ['completion_rank'])
+names = pd.DataFrame(counts.index, columns = ['city_state'])
+
+ranks = pd.concat([names, ranks], axis = 1)
+ranks['city_state_cat'] = ranks['city_state']
+ranks['city_state_cat'][ranks.completion_rank > 50] = 'Other'
+
 
 # Add the dataframes containing days_to_completion and days_open to projects dataframe
 projects = pd.concat([projects, days_to_comp, days_live], axis = 1)
 
+# Join the ranks table and projects table on the city_state columns
+projects = projects.merge(ranks, how = 'right', on = 'city_state')
 
