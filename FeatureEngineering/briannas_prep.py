@@ -1,4 +1,6 @@
+
 # coding: utf-8
+
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,16 +12,25 @@ projects = pd.read_csv('Documents/wise/Data/opendata_projects.csv')
 # Function to count the number of days between start_date and complete_date
 from dateutil.parser import parse
 import math
+import time
 
 def day_count(date0, date1):
     if isinstance(date0, float) or isinstance(date1, float):
-        return 'NA'
+        return 'NaN'
     try:
         delta = parse(date0) - parse(date1)
+        delta = delta.days
+        if delta < 0:
+            delta = 'NaN'       
+        elif delta == 0:
+            delta = 1      
+        else:
+            delta = delta
     except Exception, e:
         print date1, type(date1), date0, type(date0)
         raise e
     return delta
+
 
 # Apply dayCount function over dataframe
 def date_calc(row):
@@ -40,8 +51,9 @@ def date_calc2(row):
     return day_count(row['current_date'], row['date_posted'])
 date_diff2 = live_projects.apply(date_calc2, 1)
 
-# Create single vector dataframe of days to completion
+# Create single vector dataframe of days open. If project live fewer than 30 days, set days live to NA
 days_live = pd.DataFrame({'days_open': pd.Series(date_diff2)})
+days_live[days_live.days_open < 30] = 'NaN'
 
 # Combine city, state into city_state variable in projects dataframe
 projects['city_state'] = projects['school_city'] + ', ' + projects['school_state']
@@ -55,12 +67,14 @@ names = pd.DataFrame(counts.index, columns = ['city_state'])
 
 ranks = pd.concat([names, ranks], axis = 1)
 ranks['city_state_cat'] = ranks['city_state']
-ranks['city_state_cat'][ranks.completion_rank > 50] = 'Other'
 
+ranks['city_state_cat'][ranks.completion_rank > 50] = 'Other'
 
 # Add the dataframes containing days_to_completion and days_open to projects dataframe
 projects = pd.concat([projects, days_to_comp, days_live], axis = 1)
 
 # Join the ranks table and projects table on the city_state columns
 projects = projects.merge(ranks, how = 'right', on = 'city_state')
+
+
 
