@@ -22,7 +22,7 @@ projects.ix[projects.days_to_completion > 30, 'funded_by_30'] = 'No'
 projects.ix[projects.funding_status=='reallocated', 'funded_by_30'] = 'No'
 projects.ix[projects.days_open > 30, 'funded_by_30'] = 'No'
 
-Counter(projects.funded_by_30)
+# Counter(projects.funded_by_30) - why is this so slow
 projects = projects[projects.funded_by_30.notnull()]
 projects.shape
 
@@ -36,21 +36,36 @@ projects.ix[projects.days_to_completion <= 30, 'funded_by_30'] = 'Yes'
 projects.ix[projects.days_to_completion > 30, 'funded_by_30'] = 'No'
 projects.ix[projects.days_open > 30, 'funded_by_30'] = 'No'
 
-Counter(projects.funded_by_30)
+# Counter(projects.funded_by_30)
 projects = projects[projects.funded_by_30.notnull()]
 projects.shape
 
 
 """
-Create test set (~20%) by selecting projects most recently posted.
+Create test set (~20%) by selecting projects posted from Nov 2013 onwards.
 Then create training (~60%) and validation (~20%) sets.
 """
 # convert dates from strings to datetime objects
 projects.date_posted = [parse(x) for x in projects.date_posted]
 
+# last year of data
+x = [(parse(d).month, parse(d).year) for d in projects.date_posted\
+     if parse(d).year == 2014 or\
+        (parse(d).year == 2013 and\
+        (parse(d).month == 12 or parse(d).month == 11))]
+
+def split_train_test(date):
+    if date.year == 2014 or (date.year == 2013 and (date.month == 11 or date.month == 12)):
+        return 'Test'
+    else:
+        return 'Train'
+projects.train_test_label = [split_train_test(x) for x in projects.date_posted]
 
 
 
+"""
+misc
+"""
 
 # some weirdness
 def day_count(date0, date1):
@@ -75,4 +90,3 @@ days_to_expiry = [x.days for x in expired_projects.apply(expiration_length,\
 len([x for x in days_to_expiry if x > 0 and x < 30])   #2005
 len([x for x in days_to_expiry if x < 0])              #135
 len([x for x in days_to_expiry if x > 3000])           #32
-
