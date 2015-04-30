@@ -22,9 +22,7 @@ projects.ix[projects.days_to_completion > 30, 'funded_by_30'] = 'No'
 projects.ix[projects.funding_status=='reallocated', 'funded_by_30'] = 'No'
 projects.ix[projects.days_open > 30, 'funded_by_30'] = 'No'
 
-# Counter(projects.funded_by_30) - why is this so slow
 projects = projects[projects.funded_by_30.notnull()]
-projects.shape
 
 
 """
@@ -47,12 +45,6 @@ Then create training (~60%) and validation (~20%) sets.
 """
 # convert dates from strings to datetime objects
 projects.date_posted = [parse(x) for x in projects.date_posted]
-
-# last year of data
-x = [(parse(d).month, parse(d).year) for d in projects.date_posted\
-     if parse(d).year == 2014 or\
-        (parse(d).year == 2013 and\
-        (parse(d).month == 12 or parse(d).month == 11))]
 
 def split_train_test(date):
     if date.year == 2014 or (date.year == 2013 and (date.month == 11 or date.month == 12)):
