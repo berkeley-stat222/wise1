@@ -1,16 +1,13 @@
 # coding: utf-8
 
-import pandas as pd 
+from __future__ import division
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pylab
 import re
-import nltk, string
-from nltk.corpus import brown
-from nltk.corpus import stopwords
-from nltk import FreqDist
+import string
 from operator import itemgetter
-from __future__ import division
 from pandas import *
 
 
@@ -18,8 +15,8 @@ from pandas import *
 state_rank_count = 50
 
 # Read in opendata_projects file and donation_counts project file
-projects = pd.read_csv('Documents/wise/Data/opendata_projects.csv')
-donations = pd.read_csv('Documents/wise/Data/donations_counts.csv')
+projects = pd.read_csv('opendata_projects.csv')
+donations = pd.read_csv('donations_counts.csv')
 
 # Use "shipping cost" variable to created binary variable indicating whether a project has free shipping
 shipping = projects.loc[:,['vendor_shipping_charges']]
@@ -149,7 +146,7 @@ projects = projects.merge(ranks, how = 'right', on = 'city_state')
 projects = projects.merge(donations, how = 'right', on = 'city_state')
 
 # Read in outside data
-outside_dat =  pd.read_csv('Documents/wise/Data/outside_dat.csv', dtype = {'zip': np.str_, 'med_inc': np.float64, 'pop': np.float64, 'party': np.str_})
+outside_dat =  pd.read_csv('outside_dat.csv', dtype = {'zip': np.str_, 'med_inc': np.float64, 'pop': np.float64, 'party': np.str_})
 
 # Merge outside_data with projects
 projects = projects.merge(outside_dat, on = 'school_zip', how='left')
