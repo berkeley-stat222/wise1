@@ -1,5 +1,6 @@
 from __future__ import division
 from urllib2 import urlopen
+from collections import Counter
 import numpy as np
 import pandas as pd
 import json
@@ -35,16 +36,19 @@ the 10 proposals returned)
 # Look at the first proposal
 type(projects_json['proposals'][0])
 projects_json['proposals'][0].keys()
-projects_json['proposals'][0]
+print projects_json['proposals'][0]
+"""
 # Most items are string/float but a few are dictionaries themselves
 # Extract school types
 [x['name'] for x in projects_json['proposals'][0]['schoolTypes']]
 # Extract teacher types
 [x['name'] for x in projects_json['proposals'][0]['teacherTypes']]
 
-for proj in projects_json['proposals']:
-    print [x['name'] for x in proj['schoolTypes']]
-
+for pj in projects_json['proposals']:
+    print [x['name'] for x in pj['schoolTypes']]
+"""
+# Note: KIPP is actually in the API.
+#       Worth the effort to edit feature engineering script?
 
 #TODO: parse each project. I think it's easier to write a function to parse
 #      each project, create a row of data and concatenate to a dataframe
@@ -56,8 +60,21 @@ for proj in projects_json['proposals']:
 
 donations = pd.read_csv('donations_counts.csv')
 outside_dat =  pd.read_csv('outside_dat.csv',
-                            dtype = {'zip': np.str_, 'med_inc': np.float64,\
-                                     'pop': np.float64, 'party': np.str_})
+                           dtype = {'school_zip': np.str_, 'med_inc': np.float64,\
+                                    'pop': np.float64, 'party': np.str_})
+top_city_state = ['Charlotte, NC', 'Tucson, AZ', 'Tulsa, OK', 'Milwaukee, WI',
+                  'Seattle, WA', 'San Antonio, TX', 'Newark, NJ', 'New York, NY',
+                  'Winston Salem, NC', 'Saint Louis, MO', 'Detroit, MI', 'Richmond, VA',
+                  'Baltimore, MD', 'Indianapolis, IN', 'Staten Island, NY', 'Sacramento, CA',
+                  'Durham, NC', 'Bronx, NY', 'Dallas, TX', 'Tampa, FL',
+                  'Las Vegas, NV', 'Washington, DC', 'Van Nuys, CA', 'Richmond, CA',
+                  'Oakland, CA', 'Los Angeles, CA', 'Austin, TX', 'Oklahoma City, OK',
+                  'Atlanta, GA', 'San Jose, CA', 'San Francisco, CA', 'Miami, FL',
+                  'Bridgeport, CT', 'Anaheim, CA', 'Memphis, TN', 'Philadelphia, PA',
+                  'New Orleans, LA', 'Louisville, KY', 'Denver, CO', 'Brooklyn, NY',
+                  'Phoenix, AZ', 'Chicago, IL', 'Fort Worth, TX', 'San Diego, CA',
+                  'Bakersfield, CA', 'Portland, OR', 'Joplin, MO', 'Houston, TX',
+                  'Orlando, FL']
 
 
 def parse(proj):
@@ -104,7 +121,17 @@ def parse(proj):
     else:
         nytf = 'f'
 
-    row_dict = {'school_metro': np.nan,
+    citystate = str(proj['city'] + ", " + proj['state'])
+    if citystate in top_city_state:
+        citystatecat = citystate
+    else:
+        citystatecat = 'Other'
+
+    # gets line of outside_dat where school_zip matches the zip in proj
+    schzip = proj['zip'].split('-')[0]
+    outsideline = outside_dat[outside_dat.school_zip == schzip]
+
+    row_dict = {'school_metro': None,
                 'school_charter': charter,
                 'school_magnet': magnet,
                 'school_year_round': yr,
@@ -114,25 +141,31 @@ def parse(proj):
                 'teacher_ny_teaching_fellow': nytf,
                 'primary_focus_subject': proj['subject']['name'],
                 'resource_type': proj['resource']['name'],
-                'poverty_level': proj['povertyLevel'],
+                'poverty_level': proj['povertyLevel'].lower(),
                 'grade_level': proj['gradeLevel']['name'],
                 'total_price_excluding_optional_support': float(proj['totalPrice']),
-                'days_to_completion': np.nan,
-                'days_open': np.nan,
-                'funded_by_30': np.nan,
-                'scaled_interest_par_sub': ???,
-                'city_state': proj['city'] + ", " + proj['state'],
-                'completion_rank': ???,
-                'city_state_cat': ???,
-                'donor_counts': ???,
-                'med_inc': ???,
-                'pop': ???,
-                'party': ???,
-                'train_test_label': np.nan}
+                'days_to_completion': None,
+                'days_open': None,
+                'funded_by_30': None,
+                'scaled_interest_par_sub': '??',
+                'city_state': citystate,
+                'completion_rank': '??',
+                'city_state_cat': citystatecat,
+                'donor_counts': '??',
+                'med_inc': outsideline.iloc[0]['med_inc'],
+                'pop': outsideline.iloc[0]['pop'],
+                'party': outsideline.iloc[0]['party'],
+                'train_test_label': None}
 
-    return pd.DataFrame(row_dict)
+    return pd.DataFrame(row_dict, index=[0])
 
 
 # TODO: find out how to convert unicode (returned in the json obejcts)
 #       to regular python strings. This is a problem for the field
-#       primary_focus_subject due to ampersands -  & becomes &amp;
+#       primary_focus_subject and possibly for teacher_prefix due to ampersands
+#       & becomes &amp;
+
+
+testparse = parse(projects_json['proposals'][0])
+print type(testparse)
+print testparse.ix[0]
