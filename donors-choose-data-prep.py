@@ -1,3 +1,4 @@
+
 # coding: utf-8
 
 from __future__ import division
@@ -15,24 +16,22 @@ from pandas import *
 # # ---------------------------------------------------------------------------
 
 # Global variables
-
 state_rank_count = 50
 
 # Read in opendata_projects file and donation_counts project file
-
 projects = pd.read_csv('../Data/opendata_projects.csv', index_col = False)
 
 donations = pd.read_csv('../Data/donations_counts.csv')
 
 # Use "shipping cost" variable to created binary variable indicating whether a project has free shipping
-shipping = projects['vendor_shipping_charges']
+shipping = pd.DataFrame(projects['vendor_shipping_charges'])
 # if shipping_charges = 0 , t
 # if shipping_charges > 0 , f
 shipping[shipping == 0] = -1
 shipping[shipping > 0] = 'No'
 shipping[shipping == -1] = 'Yes'
 
-shipping.columns = ['free_shipping']
+shipping.columns.values[0]='free_shipping'
 
 # Function to count the number of days between start_date and complete_date
 from dateutil.parser import parse
@@ -55,7 +54,6 @@ def day_count(date0, date1):
         print date1, type(date1), date0, type(date0)
         raise e
     return delta
-
 
 # Apply dayCount function over dataframe
 def date_calc(row):
@@ -93,7 +91,6 @@ projects = projects[projects.funded_by_30.notnull()]
 # Create donor interest parameters by subject and poverty level
 
 # By SUBJECT
-
 # Deal with missing values
 index = np.where(projects['primary_focus_subject'].isnull())[0]
 projects.loc[index, 'primary_focus_subject'] = 'Missing'
@@ -113,7 +110,6 @@ df = pd.DataFrame({'primary_focus_subject': subjects, 'scaled_interest_par_sub' 
 projects = pd.merge(projects, df, left_on = 'primary_focus_subject', right_on='primary_focus_subject', how='left')
 
 # By POVERTY LEVEL
-
 # Deal with missing values
 index = np.where(projects['poverty_level'].isnull())[0]
 projects.loc[index, 'poverty_level'] = 'Missing'
@@ -132,7 +128,7 @@ scaled_interest_par_pov = (num_donors_pov/total_donors)**2 /poverty_prop
 df = pd.DataFrame({'poverty_level': poverty, 'scaled_interest_par_pov' : scaled_interest_par_pov.values})
 projects = pd.merge(projects, df, left_on = 'poverty_level', right_on='poverty_level', how='left')
 
-projects.columns
+#projects.columns
 
 #Replace missing values as NaN
 projects = projects.replace('Missing', np.nan)
@@ -149,6 +145,7 @@ names = pd.DataFrame(counts.index, columns = ['city_state'])
 
 ranks = pd.concat([names, ranks], axis = 1)
 ranks['city_state_cat'] = ranks['city_state']
+
 ranks['city_state_cat'][ranks.completion_rank > state_rank_count] = 'Other'
 
 # Join the ranks table and projects table on the city_state columns
@@ -165,7 +162,6 @@ projects = projects.merge(outside_dat, on = 'school_zip', how='left')
 
 # Drop last 20986 rows because those rows only have outside data
 projects = projects.drop(projects.tail(20986).index)
-
 
 # # ---------------------------------------------------------------------------
 # # Generate test set / training set
@@ -196,15 +192,18 @@ test = projects[projects.train_test_label == 'Test']
 
 # Remove unnecessary columns from projects dataframe
 # 
-# Removed: _projectid, _teacher_acctid, _schoolid, school_ncesid, school_latitude, school_longitude, school_city, school_state, school_zip, school_district, school_county, school_kipp, school_charter_ready_promise, primary_focus_area, secondary_focus_area, vendor_shipping_charges, sales_tax, payment_processing_charges, fulfillment_labor_materials, total_price_including_optional_support, students_reached, total_donations, num_donors, eligible_double_your_impact_match, eligible_almost_home_match, funding_status, date_posted, date_completed, date_thank_you_packet_mailed, date_expiration, secondary_focus_subject, city_state
+# Removed: _projectid, _teacher_acctid, _schoolid, school_ncesid, school_latitude, school_longitude, school_city, school_state, school_zip, school_district, school_county, school_kipp, school_charter_ready_promise, primary_focus_area, secondary_focus_area, sales_tax, payment_processing_charges, fulfillment_labor_materials, total_price_including_optional_support, students_reached, total_donations, num_donors, eligible_double_your_impact_match, eligible_almost_home_match, funding_status, date_posted, date_completed, date_thank_you_packet_mailed, date_expiration, secondary_focus_subject, city_state, vendor_shipping_charges
+
+#projects.columns
 
 drop_cols = ['_projectid', '_teacher_acctid', '_schoolid', 'school_ncesid', 'school_latitude', 'school_longitude',
              'school_city', 'school_state', 'school_zip', 'school_district', 'school_county', 'school_kipp',
-             'school_charter_ready_promise', 'primary_focus_area', 'secondary_focus_area', 'vendor_shipping_charges',
+             'school_charter_ready_promise', 'primary_focus_area', 'secondary_focus_area', 'completion_rank',
              'sales_tax', 'payment_processing_charges', 'fulfillment_labor_materials', 'total_price_including_optional_support',
              'students_reached', 'total_donations', 'num_donors', 'eligible_double_your_impact_match', 
              'eligible_almost_home_match', 'funding_status', 'date_posted', 'date_completed', 'date_thank_you_packet_mailed',
-             'date_expiration', 'secondary_focus_subject', 'Unnamed: 0', 'city_state']
+             'date_expiration', 'secondary_focus_subject', 'Unnamed: 0', 'city_state', 'donor_counts', 'days_open', 
+             'days_to_completion', 'vendor_shipping_charges']
 
 projects = projects.drop(drop_cols, axis = 1)
 train = train.drop(drop_cols, axis = 1)
@@ -221,4 +220,6 @@ test = test.drop(drop_cols2, axis = 1)
 # Write separate training/testing sets to csvs
 train.to_csv('../Data/training_set.csv', index = False)
 test.to_csv('../Data/testing_set.csv', index = False)
+
+
 
