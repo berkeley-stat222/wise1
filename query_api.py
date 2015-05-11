@@ -174,6 +174,24 @@ def parse(proj):
     return pd.DataFrame(row_dict, index=[0])
 
 
+def query_api(proj_id):
+    """
+    Args:   project ID of the project to be queried
+            from the donorschoose API
+
+    Output: A pandas dataframe consisting of a single line that featurizes
+            the API data into the same form as the data used to train the 
+            model so that we can predict on this new line.
+    """
+    dc_apikey = '80g5fqgy8nd2'
+    url_string = 'http://api.donorschoose.org/common/json_feed.html?id='\
+                 + proj_id + '&APIKey=' + dc_apikey
+    query = urlopen(url_string)
+    projects_json = json.load(query)
+
+    return parse(projects_json['proposals'][0])
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print >> sys.stderr, "Usage: python query_api.py <project ID number>"
@@ -187,13 +205,7 @@ if __name__ == "__main__":
     Projects are actually returned but I'm not sure how they're chosen.
     """
 
-    dc_apikey = '80g5fqgy8nd2'
-    url_string = 'http://api.donorschoose.org/common/json_feed.html?id='\
-                 + sys.argv[1] + '&APIKey=' + dc_apikey
-    query = urlopen(url_string)
-    projects_json = json.load(query)
-
-    newline = parse(projects_json['proposals'][0])
+    newline = query_api(sys.argv[1])
     # A couple tests:
     print type(newline)
     print newline.dtypes
@@ -202,4 +214,4 @@ if __name__ == "__main__":
 
     # load the pretrained model here
     # predict and save the prediction
-    # transfrom prediction to appropriate json and print
+    # transform prediction to appropriate json and print
