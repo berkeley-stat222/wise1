@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import json
 import sys
+import string
 
 """
 Assumes donation_counts.csv, outside_dat.csv and
@@ -183,11 +184,17 @@ def query_api(proj_id):
             the API data into the same form as the data used to train the 
             model so that we can predict on this new line.
     """
+    if len(proj_id) != 7 or not proj_id.isdigit():
+        raise ValueError('The project ID should be a 7 digit number.')
+
     dc_apikey = '80g5fqgy8nd2'
     url_string = 'http://api.donorschoose.org/common/json_feed.html?id='\
                  + proj_id + '&APIKey=' + dc_apikey
     query = urlopen(url_string)
     projects_json = json.load(query)
+
+    if not projects_json['proposals']:
+        raise ValueError('Invalid project ID.')
 
     return parse(projects_json['proposals'][0])
 
