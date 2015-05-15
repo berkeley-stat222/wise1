@@ -31,4 +31,4 @@ names_donations = pd.DataFrame(counts_donations.index, columns = ['city_state'])
 
 ranks_donations_3 = pd.concat([names_donations, counts_donations_2], axis=1)
 
-projects = projects.merge(ranks_donations_3, how = 'left', on = 'city_state')
+donor_counts.to_csv('/Users/stephaniekim/Desktop/Files/donation_counts.csv',index=False)
