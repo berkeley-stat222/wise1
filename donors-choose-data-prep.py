@@ -22,8 +22,8 @@ state_rank_count = 50
 projects = pd.read_csv('../Data/opendata_projects.csv', index_col = False)
 donations = pd.read_csv('../Data/donations_counts.csv')
 trends = pd.read_csv('../Data/google_queries.csv')
-outside_dat =  pd.read_csv('../Data/outside_dat.csv', 
-                           dtype = {'zip': np.str_, 'med_inc': np.float64, 'pop': np.float64, 
+outside_dat =  pd.read_csv('.../IndividualScripts/outside_dat_merge/outside_datmay16.csv', 
+                           dtype = {'school_zip': np.str_, 'med_inc': np.float64, 'pop': np.float64, 
                                     'party': np.str_})
 
 # Use "shipping cost" variable to created binary variable indicating whether a project has free shipping
