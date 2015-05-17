@@ -1,6 +1,6 @@
 """
 The code does the following:
-    1. Take in argument from command line (project ID)
+    1. Take in argument (project ID)
     2. Queries API to get data for the proj_id
     3. Transforms API data to same featurized format used in model building
     4. Loads a pre-trained random-forest model
@@ -19,10 +19,12 @@ import string
 import WiseGamma
 from WiseGamma import DataSet, Model
 import GammaLL
+import requests
+import ast
 
 # read in external data
 donations = pd.read_csv('donations_counts.csv')
-outside_dat =  pd.read_csv('outside_dat.csv',
+outside_dat =  pd.read_csv('outside_datmay16.csv',
                            dtype = {'school_zip': np.str_, 'med_inc': np.float64,\
                                     'pop': np.float64, 'party': np.str_})
 
@@ -48,8 +50,8 @@ top_city_state = ['Charlotte, NC', 'Tucson, AZ', 'Tulsa, OK',
 sub_interest_dict = {np.nan: 5.7427204567211509e-05,
                      'Applied Sciences': 0.046910901426980053,
                      'Character Education': 0.011734209594511109,
-                     'Civics & Government': 0.004503308399487903,
-                     'College & Career Prep': 0.0089410822293279311,
+                     'Civics &amp Government': 0.004503308399487903,
+                     'College &amp Career Prep': 0.0089410822293279311,
                      'Community Service': 0.0027847007712426398,
                      'ESL': 0.012527814969187872,
                      'Early Development': 0.018895469981275802,
@@ -57,12 +59,12 @@ sub_interest_dict = {np.nan: 5.7427204567211509e-05,
                      'Environmental Science': 0.041058586686500816,
                      'Extracurricular': 0.0044112279435957096,
                      'Foreign Languages': 0.0086835485407214408,
-                     'Gym & Fitness': 0.010195240246769564,
-                     'Health & Life Science': 0.037509555650384836,
-                     'Health & Wellness': 0.013788715992077571,
-                     'History & Geography': 0.024063208266852952,
+                     'Gym &amp Fitness': 0.010195240246769564,
+                     'Health &amp; Life Science': 0.037509555650384836,
+                     'Health &amp Wellness': 0.013788715992077571,
+                     'History &amp Geography': 0.024063208266852952,
                      'Literacy': 0.2898423422134363,
-                     'Literature & Writing': 0.12423840541970035,
+                     'Literature &amp Writing': 0.12423840541970035,
                      'Mathematics': 0.11526493598853993,
                      'Music': 0.051238013697982497,
                      'Nutrition': 0.0021274501290110691,
@@ -125,6 +127,9 @@ def parse(proj):
     subject = proj['subject']['name']
     poverty = proj['povertyLevel'].lower()
 
+    # Get Google Trends data
+    trends = retrieve_goog()
+    
     row_dict = {'school_latitude': proj['latitude'],
                 'school_longitude': proj['longitude'],
                 'school_charter': 't' if "Charter" in sch_types else 'f',
@@ -145,8 +150,7 @@ def parse(proj):
                 'years_since_2000': float(proj['expirationDate'].split('-')[0]) - 2000,
                 'scaled_interest_par_sub': sub_interest_dict[subject],
                 'scaled_interest_par_pov': pov_interest_dict[poverty],
-                'city_state_counts': ???,
-                'Google_query': ???,
+                'Google_query': trends,
                 'med_inc': outsideline.iloc[0]['med_inc'],
                 'pop': outsideline.iloc[0]['pop'],
                 'party': outsideline.iloc[0]['party']}
