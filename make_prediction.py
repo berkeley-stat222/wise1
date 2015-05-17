@@ -79,6 +79,24 @@ pov_interest_dict = {'high poverty': 0.2494275125818487,
                      'low poverty': 0.02598288386748716,
                      'moderate poverty': 0.1404074103565012}
 
+# Retrieve Google Trends data; implemented inside the parse function
+def retrieve_goog():
+    html_base = u"http://www.google.com/trends/fetchComponent?q="
+    q = u"donors+choose"
+    query_type = u"&cid=TIMESERIES_GRAPH_0&export=3"
+    full_query = html_base + q + query_type
+    response = requests.get(full_query)
+    split = response.text.split('setResponse(')
+    if len(split)==1: # If you have reached your quota limit, return value is different
+        q_count = None
+    else:
+        nice_dict = ast.literal_eval(split[1].rstrip()[:-2].replace('new Date', ''))
+        # Ugly formatting (from Java)
+        # Get most recent Google Trends count
+        q_count_scaled = nice_dict['table']['rows'][-1]['c'][-1]['v']
+        scale = 0.09854
+        q_count = scale * q_count_scaled * 7 # unscale by top # of counts, convert to weekly
+    return(q_count)
 
 def parse(proj):
     """
@@ -183,7 +201,7 @@ if __name__ == "__main__":
     newline_ds = DataSet.load('temp.csv')
 
 
-    trained_model = load_model("<model>") #FIXME: fill in name of the model file
+    trained_model = load_model("model1") 
     pred = trained_model.probs(newline_ds)
 
     """ Version 2 (not currently available)  
