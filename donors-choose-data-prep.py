@@ -19,7 +19,7 @@ from pandas import *
 state_rank_count = 50
 
 # Read in opendata_projects file and donation_counts project file, google queries data, and outside_dat
-projects = pd.read_csv('../Data/opendata_projects.csv', index_col = False)
+projects = pd.read_csv('../Data/opendata_projects.csv', index_col = False, dtype = {'school_zip': np.str_})
 donations = pd.read_csv('../Data/donations_counts.csv')
 trends = pd.read_csv('../Data/google_queries.csv')
 outside_dat =  pd.read_csv('.../IndividualScripts/outside_dat_merge/outside_datmay16.csv', 
@@ -264,7 +264,7 @@ drop_cols = ['_projectid', '_teacher_acctid', '_schoolid', 'school_ncesid', 'sch
              'total_price_including_optional_support', 'students_reached', 'total_donations', 'num_donors', 'eligible_double_your_impact_match', 
              'eligible_almost_home_match', 'funding_status', 'date_posted', 'date_completed', 'date_thank_you_packet_mailed',
              'date_expiration', 'secondary_focus_subject', 'Unnamed: 0', 'city_state', 'donor_counts', 'days_open', 
-             'days_to_completion', 'vendor_shipping_charges', 'city_state_cat', 'keep_drop', 'year_week']
+             'days_to_completion', 'vendor_shipping_charges', 'city_state_cat', 'keep_drop', 'year_week', 'city_state_counts']
 
 projects = projects.drop(drop_cols, axis = 1)
 train = train.drop(drop_cols, axis = 1)
