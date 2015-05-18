@@ -256,7 +256,7 @@ test = projects[projects.train_test_label == 'Test']
 
 # Remove unnecessary columns from projects dataframe
 # 
-# Removed: _projectid, _teacher_acctid, _schoolid, school_ncesid, school_city, school_state, school_zip, school_district, school_county, school_kipp, school_charter_ready_promise, primary_focus_area, secondary_focus_area, sales_tax, payment_processing_charges, fulfillment_labor_materials, total_price_including_optional_support, students_reached, total_donations, num_donors, eligible_double_your_impact_match, eligible_almost_home_match, funding_status, date_posted, date_completed, date_thank_you_packet_mailed, date_expiration, secondary_focus_subject, city_state, vendor_shipping_charges, city_state_cat, keep_drop
+# Removed: _projectid, _teacher_acctid, _schoolid, school_ncesid, school_city, school_state, school_zip, school_district, school_county, school_kipp, school_charter_ready_promise, primary_focus_area, secondary_focus_area, sales_tax, payment_processing_charges, fulfillment_labor_materials, total_price_including_optional_support, students_reached, total_donations, num_donors, eligible_double_your_impact_match, eligible_almost_home_match, funding_status, date_posted, date_completed, date_thank_you_packet_mailed, date_expiration, secondary_focus_subject, city_state, vendor_shipping_charges, city_state_cat, keep_drop, year_week, city_state_counts, school_metro
 
 drop_cols = ['_projectid', '_teacher_acctid', '_schoolid', 'school_ncesid', 'school_city', 'school_state', 'school_zip', 
              'school_district', 'school_county', 'school_kipp', 'school_charter_ready_promise', 'primary_focus_area', 
@@ -264,7 +264,7 @@ drop_cols = ['_projectid', '_teacher_acctid', '_schoolid', 'school_ncesid', 'sch
              'total_price_including_optional_support', 'students_reached', 'total_donations', 'num_donors', 'eligible_double_your_impact_match', 
              'eligible_almost_home_match', 'funding_status', 'date_posted', 'date_completed', 'date_thank_you_packet_mailed',
              'date_expiration', 'secondary_focus_subject', 'Unnamed: 0', 'city_state', 'donor_counts', 'days_open', 
-             'days_to_completion', 'vendor_shipping_charges', 'city_state_cat', 'keep_drop', 'year_week', 'city_state_counts']
+             'days_to_completion', 'vendor_shipping_charges', 'city_state_cat', 'keep_drop', 'year_week', 'city_state_counts', 'school_metro']
 
 projects = projects.drop(drop_cols, axis = 1)
 train = train.drop(drop_cols, axis = 1)
